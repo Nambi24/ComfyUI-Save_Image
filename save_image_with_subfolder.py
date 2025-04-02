@@ -85,3 +85,33 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SaveImageNode": "Save Image With Subfolder",
     "ExtractLastPathComponent": "Extract Last Path Component"
 }
+class ListSubfoldersNode:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "main_folder_path": ("STRING", {"default": "./outputs"}),
+                "load_capacity": ("INT", {"default": 100, "min": 1}),
+                "start_index": ("INT", {"default": 0, "min": 0}),
+            }
+        }
+
+    RETURN_TYPES = ("LIST",)
+    RETURN_NAMES = ("subfolder_paths",)
+    FUNCTION = "list_subfolders"
+    CATEGORY = "Custom Nodes"
+
+    def list_subfolders(self, main_folder_path, load_capacity, start_index):
+        try:
+            if not os.path.isdir(main_folder_path):
+                return ([],)
+
+            all_entries = sorted([
+                os.path.join(main_folder_path, name)
+                for name in os.listdir(main_folder_path)
+                if os.path.isdir(os.path.join(main_folder_path, name))
+            ])
+            selected_subfolders = all_entries[start_index:start_index + load_capacity]
+            return (selected_subfolders,)
+        except Exception as e:
+            return ([f"Error: {str(e)}"],)
