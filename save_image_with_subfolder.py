@@ -91,27 +91,42 @@ class ListSubfoldersNode:
         return {
             "required": {
                 "main_folder_path": ("STRING", {"default": "./outputs"}),
+                "path_index": ("INT", {"default": 0, "min": 0, "description": "Index of the path to select (0 for first path)"}),
                 "load_capacity": ("INT", {"default": 100, "min": 1}),
                 "start_index": ("INT", {"default": 0, "min": 0}),
             }
         }
 
-    RETURN_TYPES = ("LIST",)
-    RETURN_NAMES = ("subfolder_paths",)
+    RETURN_TYPES = ("STRING", "LIST",)
+    RETURN_NAMES = ("selected_path", "all_paths",)
     FUNCTION = "list_subfolders"
     CATEGORY = "Custom Nodes"
 
-    def list_subfolders(self, main_folder_path, load_capacity, start_index):
+    def list_subfolders(self, main_folder_path, path_index, load_capacity, start_index):
         try:
             if not os.path.isdir(main_folder_path):
-                return ([],)
+                return ("No valid directory found", [])
 
-            all_entries = sorted([
+            # Get all subfolders
+            all_subfolders = sorted([
                 os.path.join(main_folder_path, name)
                 for name in os.listdir(main_folder_path)
                 if os.path.isdir(os.path.join(main_folder_path, name))
             ])
-            selected_subfolders = all_entries[start_index:start_index + load_capacity]
-            return (selected_subfolders,)
+            
+            # Get the paginated subset of subfolders
+            selected_subfolders = all_subfolders[start_index:start_index + load_capacity]
+            
+            # Select the specific path based on user input
+            if not all_subfolders:
+                return ("No subfolders found", [])
+                
+            # Ensure path_index is within valid range
+            if path_index >= len(all_subfolders):
+                selected_path = f"Index {path_index} out of range (max: {len(all_subfolders)-1})"
+            else:
+                selected_path = all_subfolders[path_index]
+            
+            return (selected_path, selected_subfolders)
         except Exception as e:
-            return ([f"Error: {str(e)}"],)
+            return (f"Error: {str(e)}", [f"Error: {str(e)}"])
