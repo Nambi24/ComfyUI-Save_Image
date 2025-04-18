@@ -150,7 +150,7 @@ class ExtractLastPathComponent:
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING", "STRING", "STRING")
+    RETURN_TYPES = ("STRING", "STRING", "LIST", "LIST")
     RETURN_NAMES = ("last_component", "folder_paths", "file_names", "subfolder_filenames")
     FUNCTION = "extract_last_component"
     CATEGORY = "Custom Nodes"
@@ -191,10 +191,9 @@ class ExtractLastPathComponent:
                         file_names.append(os.path.splitext(item)[0])
         
         # Join the file names into a single string with newlines
-        file_names_string = "\n".join(file_names)
-        subfolder_files_string = "\n".join(subfolder_files)
-        
-        return (last_component, folder_paths, file_names_string, subfolder_files_string)
+        folder_paths_string = "\n".join(folder_paths)
+
+        return (last_component, folder_paths_string, file_names, subfolder_files)
 
 
 class ListSubfoldersNode:
